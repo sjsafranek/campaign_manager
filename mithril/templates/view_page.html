@@ -1,0 +1,234 @@
+
+ {% extends 'base.html' %}
+
+ {% block title %}
+     WikiPage
+ {% endblock %}
+
+ {% block style %}
+
+    <style>
+
+        .navigation_bar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            height: calc(100% - 56px) !important;
+            overflow-y: scroll !important;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-top: 26px;
+            padding-bottom: 26px;
+        }
+
+        .navigation_section {
+            padding-left: 16px;
+        }
+
+        .page-content {
+            right: 0px;
+            position: absolute;
+        }
+
+        .app-container {
+            padding-top: 68px;
+        }
+
+
+        .core-nav .dropdown > .dropdown-menu > li > a {
+            padding: 4px 15px !important;
+        }
+
+        .dropdown-menu {
+            margin-top: 0px !important;
+            padding-bottom: 4px !important;
+        }
+
+        .current-page {
+            color: #e74c3c !important;
+            border-color: #e74c3c !important;
+            border-style: solid !important;
+            border-width: 1px !important;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+
+
+
+
+
+    <nav hidden>
+        <div class="nav-header">
+            <button class="toggle-bar">
+                <i data-feather="menu"></i>
+            </button>
+        </div>
+        <ul class="menu">
+
+            <!-- <li>
+                <a href="/wiki">Wiki</a>
+            </li> -->
+            <li>
+                <a href="/upload/file">Upload</a>
+            </li>
+
+
+            <!-- <li class="dropdown">
+                <a href="#">
+                    <i data-feather="list"></i> Wiki
+                </a>
+
+                <ul class="dropdown-menu wikiPageNavigation"></ul>
+            </li> -->
+
+            <li>
+                <a href="/logout">Logout</a>
+            </li>
+
+        </ul>
+        <!-- <ul class="attributes">
+            <li>
+                <a href="#">
+                    <i class="icon" data-feather="facebook"></i>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="icon" data-feather="twitter"></i>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="icon" data-feather="instagram"></i>
+                </a>
+            </li>
+        </ul> -->
+    </nav>
+
+
+
+    <div class="section">
+        <div class="container">
+            <div class="col-md-9 page-content">
+                {% autoescape off %}
+                    {{ page_content }}
+                {% endautoescape %}
+            </div>
+        </div>
+    </div>
+
+        <script>
+
+            // BUILD NAVIGATION TREE
+            var navigation = {{ navigation | safe }};
+
+
+            function createListLinkElem(section) {
+                return $('<li>').append(
+                    $('<a>', {
+                        href: section.href,
+                        title: section.name
+                    }).text(section.name.toTitleCase())
+                )
+            }
+
+
+            function build_navigation_bar(section) {
+                // recursively build
+                var dir_elems = [];
+                if (section.dirs) {
+                    for (var i in section.dirs) {
+                        dir_elems.push(
+                            build_navigation_bar(section.dirs[i])
+                        );
+                    }
+                }
+
+                // build section list
+                var file_elems = [];
+                for (var i=0; i<section.files.length; i++) {
+                    if ("index" == section.files[i].name) continue;
+                    file_elems.push(
+                        createListLinkElem(section.files[i])
+                    );
+                }
+
+                // return dropdown container
+                return $('<li>').addClass('dropdown').append(
+                            $('<a>', {
+                                // href: section.href,
+                                title: section.name
+                            }).text(section.name.toTitleCase()),
+                            $('<ul>').addClass('dropdown-menu').append(
+                                createListLinkElem(section), // index
+                                dir_elems,
+                                file_elems
+                            )
+                        );
+            }
+
+
+
+            var elems = build_navigation_bar(navigation.wiki);
+
+            // $('.wikiPageNavigation')
+            $('ul.menu')
+                .append(elems)
+
+
+
+            // dropdown
+            function openNavigationParents(elem, list) {
+                list = list || [];
+                var parents = elem.closest('.dropdown');
+                if (parents.length) {
+                    list.push(parents);
+                    return openNavigationParents(parents.parent(), list);
+                }
+
+                list = list.reverse();
+                for (var i=0; i<list.length; i++) {
+                    list[i].addClass('open');
+                }
+            }
+
+            function openNavigationToCurrentPage() {
+                var pathname = window.location.pathname;
+                var last = pathname.slice(pathname.length -1);
+                if ('/' == last) {
+                    pathname = pathname.slice(0, -1);
+                }
+                var elem = $('a[href="'+pathname+'"]');
+                elem.addClass('current-page');
+                openNavigationParents(elem)
+            }
+
+
+        </script>
+
+        <!-- <script src="https://corenav.com/dist/assets/js/jquery.min.js"></script> -->
+        <!-- <script src="https://corenav.com/dist/assets/js/coreNavigation.js"></script> -->
+        <!-- <script src="https://unpkg.com/feather-icons@4.7.3/dist/feather.min.js"></script> -->
+        <script>
+
+			// $('nav').coreNavigation({
+			// 	layout: "sidebar",
+            //     responsideSlide: true, // true or false
+            //     dropdownEvent: "accordion",
+            //     mode: 'fixed'
+            // });
+
+            // feather.replace();
+
+            openNavigationToCurrentPage();
+
+		</script>
+
+{% endblock %}

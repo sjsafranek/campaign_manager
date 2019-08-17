@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Upload Image
+{% endblock %}
+
+{% block style %}
+<style>
+    .app-container {
+        padding-top: 72px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    {% include "navigation_bar.html" %}
+
+    <div class="container app-container">
+        <div class="row">
+
+            <div class="col-sm">
+                <form enctype="multipart/form-data" action="/upload/file" method="POST">
+                    {% csrf_token %}
+                    <h1 class="h3 mb-3 font-weight-normal text-muted">Upload File</h1>
+                    <div class="form-group">
+                        <input type"text" class="form-control" placeholder="File Type" name="section">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa fa-upload" aria-hidden="true"></i> <b>Upload</b>
+                            </button>
+                        </div>
+                        <div class="custom-file">
+                            <input class="custom-file-input" type="file" placeholder="uploadfile" name="uploadfile" id="inputGroupFile01">
+                            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-sm status-message">
+                <div class="justify-content-center">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {% for key,value in form.errors.items %}
+                        <div>
+                            {{ value.as_text }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+   <script>
+        var uploaded_files = {{ uploaded_files | safe }};
+        if (0 != uploaded_files.length) {
+            $('.status-message').append(
+                $('<div>').append(
+                    $('<label>').append("Uploaded files")
+                )
+            );
+        }
+        for (var i=0; i<uploaded_files.length; i++) {
+            $('.status-message').append(
+                $('<div>').append(
+                    $('<a>', {href: '/'+uploaded_files[i]}).text(uploaded_files[i])
+                )
+            );
+        }
+
+        $('#inputGroupFile01').on('change',function(){
+            console.log(this.files[0].name);
+            $('.custom-file-label').text(this.files[0].name);
+        });
+
+   </script>
+
+{% endblock %}
